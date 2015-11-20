@@ -1,0 +1,26 @@
+﻿生成启动时间为 2015/10/13 9:35:15。
+     1>项目“F:\armadillo-5.400.2\examples\example1_win64.vcxproj”在节点 2 上(Build 个目标)。
+     1>ClCompile:
+         D:\Visual Studio 2013\VC\bin\x86_amd64\CL.exe /c /I..\include /Zi /nologo /W1 /WX- /O2 /D ARMA_USE_LAPACK /D ARMA_USE_BLAS /Gm- /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt basis.cpp main.cpp
+         basis.cpp
+         main.cpp
+         正在生成代码...
+       ResourceCompile:
+         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\rc.exe /l"0x0409" /nologo /fo"x64\Release\example1_win64.res" example1_win64.rc 
+       Link:
+         D:\Visual Studio 2013\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"F:\armadillo-5.400.2\examples\x64\Release\example1_win64.exe" /NOLOGO /LIBPATH:lib_win64 lapack_win64_MT.lib blas_win64_MT.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:"F:\armadillo-5.400.2\examples\x64\Release\example1_win64.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"F:\armadillo-5.400.2\examples\x64\Release\example1_win64.lib" /MACHINE:X64 x64\Release\example1_win64.res
+         x64\Release\basis.obj
+         x64\Release\main.obj
+         example1_win64.vcxproj -> F:\armadillo-5.400.2\examples\x64\Release\example1_win64.exe
+       PostBuildEvent:
+         copy lib_win64\*.dll F:\armadillo-5.400.2\examples\x64\Release\
+         :VCEnd
+         lib_win64\armadillo.dll
+         lib_win64\blas_win64_MT.dll
+         lib_win64\lapack_win64_MT.dll
+         已复制         3 个文件。
+     1>已完成生成项目“F:\armadillo-5.400.2\examples\example1_win64.vcxproj”(Build 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:02.49
