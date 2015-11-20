@@ -1011,3 +1011,60 @@ bool BsplineApp(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个数为r+1
 	fout.close();
 	return true;
 }
+
+void bspline::refineknotvectcurve(int n, int p){
+	/*节点细化，根据插入的x[]向量*/
+	int j;
+	int m = n + p + 1;
+	
+	int a = findspan(0, m_inumofknots, x[0]);
+	int b = findspan(0, m_inumofknots, x[xknots]);
+	b = b + 1;
+	for (j = 0; j < a - p; j++)
+	{
+		qw[j] = pw[j];
+	
+	}
+	for (j = b - 1; j <= n; j++)
+	{
+		qw[j + xknots + 1] = pw[j];
+		
+	} 
+	for (j = 0; j <= a; j++) ubar[j] = m_vfknotsvector[j];
+	for (j = b + p; j <= m; j++) ubar[j + xknots + 1] = m_vfknotsvector[j];
+	int i = b + p - 1;
+	int k = b + p + xknots;
+	for (j = xknots; j >= 0; j--)
+	{
+		while (x[j] <= m_vfknotsvector[i] && i>a)
+		{
+			qw[k - p - 1] = pw[i - p - 1];
+			ubar[k] = m_vfknotsvector[i];
+			k = k - 1;
+			i = i - 1;
+		}
+		qw[k - p - 1] = qw[k - p];
+		
+		for (j = xknots; j >= 0; j--)
+		{
+			int ind = k - p + 1;
+			float alfa = ubar[k + 1] - x[j];
+			if (abs(alfa) == 0)
+			{
+				qw[ind - 1] = qw[ind];
+			}
+
+				
+			else
+			{
+				alfa = alfa / (ubar[k + 1] - m_vfknotsvector[i - p + 1]);
+				qw[ind - 1] = qw[ind - 1] * alfa + qw[ind] * (1.0 - alfa) ;
+				
+			}
+		}
+		ubar[k] = x[j];
+		k = k + 1;
+	}
+	/*细化后节点矢量ubar和插入后控制点qw*/
+    
+}
