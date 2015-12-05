@@ -47,6 +47,8 @@ void SurfacePoint(int n, int p, float U[], int m, int q, float V[], point P[][3]
 void SurfaceDerivsAlg1(int n, int p, float U[], int m, int q, float V[], point P[][3], float u, float v, const int d, point SKL[][100]);
 
 
+
+
 /*算法9.6*/
 bool WCLeastSquaresCureve(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个数为r+1
 	float Wq[],           //>0 是非约束点,<0是约束点 ，大小 r+1

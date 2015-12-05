@@ -167,7 +167,6 @@ void DersBasisFuns(int i, float u, int p, int n, vector<float> U, vector<vector<
 	right.push_back(0.0);
 	ndu[0].push_back(1.0);
 
-	cout << "here" << endl;
 
 	for (j = 1; j <= p; j++)
 	{
@@ -251,7 +250,6 @@ float OneBasisFuns(int p, int m, vector<float> U, int i, float u)
 	}
 	if (u < U[i] || u >= U[i + p + 1])
 	{
-		cout << "here" << endl;
 		Nip = 0.0; return Nip;
 	}
 	for (int j = 0; j <= p; j++)
@@ -575,27 +573,31 @@ float Distance3D(point a, point b)
 	return sqrt(c);
 }
 /*算法9.3 参数化需拟合曲面数据点*/
-bool SurfMeshParams(int n, int m, point Q[][NUM], float uk[], float vl[])
-{
-	float cds[] = { 0 };
-	int num = m + 1;
-	uk[0] = 0.0; uk[n] = 1.0;
-	
-
-	/*计算vk*/
-	for (int l = 0; l <= m; l++)
+bool 
+Surf_Mesh_Params(
+	int data_x, int data_y, 
+	vector<vector<point> >& Q,
+	vector<float>& uk , vector<float>& vl)
+{	/*计算vk*/
+	vector<float> cds ;
+	cds.push_back(0);
+	int num = data_y + 1;
+	uk.push_back(0.0);
+	for (int k = 0; k < data_x; k++) uk.push_back(0.0);
+	 uk.push_back(1.0);
+	for (int l = 0; l <= data_y; l++)
 	{
 		float total = 0.0;
-		for (int k = 1; k <= n; k++)
+		for (int k = 1; k <= data_x; k++)
 		{
-			cds[k] = Distance3D(Q[k][l], Q[k - 1][l]);
+			cds.push_back(Distance3D(Q[k][l], Q[k - 1][l]));
 			total = total + cds[k];
 		}
 		if (0.0 == total) num = num - 1;
 		else
 		{
 			float d = 0.0;
-			for (int k = 1; k < n; k++)
+			for (int k = 1; k < data_x; k++)
 			{
 				d = d + cds[k];
 				uk[k] = uk[k] + d / total;
@@ -604,27 +606,31 @@ bool SurfMeshParams(int n, int m, point Q[][NUM], float uk[], float vl[])
 		}
 	}
 	if (0 == num) return false; 
-	for (int k = 1; k < n; k++)
+	for (int k = 1; k < data_x; k++)
 	{
 		uk[k] = uk[k] / num;
 	}
 
 	/*计算vl*/
-	vl[0] = 0.0; vl[m] = 1.0;
-	num = n + 1;
-	for (int l = 0; l <= n; l++)
+	cds.clear();
+	cds.push_back(0);
+	vl.push_back(0.0);
+	for (int k = 0; k < data_y; k++) vl.push_back(0.0);
+	vl.push_back(1.0);
+	num = data_x + 1;
+	for (int l = 0; l <= data_x; l++)
 	{
 		float total = 0.0;
-		for (int k = 1; k <= m; k++)
+		for (int k = 1; k <= data_y; k++)
 		{
-			cds[k] = Distance3D(Q[k][l], Q[k][l]);
+			cds.push_back(Distance3D(Q[l][k], Q[l][k - 1]));
 			total = total + cds[k];
 		}
 		if (0.0 == total) num = num - 1;
 		else
 		{
 			float d = 0.0;
-			for (int k = 1; k < m; k++)
+			for (int k = 1; k < data_y; k++)
 			{
 				d = d + cds[k];
 				vl[k] = vl[k] + d / total;
@@ -632,12 +638,10 @@ bool SurfMeshParams(int n, int m, point Q[][NUM], float uk[], float vl[])
 		}
 	}
 	if (0 == num) return false;
-	for (int k = 1; k < m; k++)
+	for (int k = 1; k < data_y; k++)
 	{
 		vl[k] = vl[k] / num;
 	}
-
-
 	return true;
 
 }
@@ -672,19 +676,18 @@ void Getub(vector<point> Q, int n, vector<float>& ub)
 	//ub.push_back(1.0);
 }
 
-void GetU(int m, int n, int p, vector<float> ub, vector<float>& U)
+void GetU(int data_num, int result_num, int degree, vector<float> ub, vector<float>& U)
 {
-	float d = static_cast<float>(m + 1) / static_cast<float>(n - p + 1);
+	float d = static_cast<float>(data_num + 1) / static_cast<float>(result_num - degree + 1);
 	cout <<"D :"<<d<<typeid(d).name()<< endl;
-	for (int i = 0; i <= p; i++)  U.push_back(0);
-	for (int j = 1; j <= n-p; j++)
+	for (int i = 0; i <= degree; i++)  U.push_back(0);
+	for (int j = 1; j <= result_num - degree; j++)
 	{
 		int i = (int)(j*d); 
-		cout <<"j*d :" <<j*d << endl;
 		float a = j*d - i; cout << "a:"<<a << endl;
 		U.push_back((1.0 - a)*ub[i - 1] + a*ub[i]);
 	}
-	for (int i = 0; i <= p; i++)
+	for (int i = 0; i <= degree; i++)
 	{
 		U.push_back(1);
 	}
@@ -781,7 +784,6 @@ bool WCLeastSquaresCureve(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个
 		}
 		if (0 == dflag)  BasisFuns(span, *cerr, p, U, funs[0]);
 		else DersBasisFuns(span, *cerr, p, 1, U, funs);
-		cout << "here" << endl;
 		if (Wq[i] > 0.0)
 		{
 			std::cout << "Wq[i] > 0.0" << endl;
@@ -913,22 +915,8 @@ bool BsplineApp(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个数为r+1
 	Getub(Q, r, ub);
 	//9.68,9.69 存入U[]
 	vector<float>::iterator cerr;
-	cout << " UB[] :" << endl;
-	for (cerr = ub.begin(); cerr != ub.end(); cerr++)
-	{
-		cout << *cerr << " ";
-	}
-	cout << endl;
 	GetU(r, n, p, ub, U);
 	cout << " U[] : " << endl;
-	for (cerr = U.begin(); cerr != U.end(); cerr++)
-	{
-		cout << *cerr << " ";
-	}
-	cout << U.size();
-	cout << endl;
-
-	cout << " N" << endl;
 	for (int i = 1; i < r;i++)
 	{
 		
@@ -937,26 +925,20 @@ bool BsplineApp(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个数为r+1
 		{
 			//int span = FindSpan(U.size(), p, ub[i], U);
 			N(i - 1, j - 1) = OneBasisFuns(p, U.size()-1, U, j-1, ub[i]);
-			cout << N(i - 1, j - 1) << " ";
 		}
-		cout << endl;
+	
 	}
 
 
-	cout << " NS" << endl;
+	
 	for (int i = 1,k =0; i < r; i++,k++)
 	{
 		int span = FindSpan(U.size() - 1, p, ub[i], U);
-		cout << span << endl;
 		NS(k,0) = OneBasisFuns(p, U.size() - 1, U, 0, ub[i]);
-		cout << NS(k, 0) << " ";
 		NS(k, 1) = OneBasisFuns(p, U.size() - 1, U, n, ub[i]);
-		cout << NS(k, 1) << " ";
-		cout << endl;
 	}
 	
 	mat NTN = N.t() * N;
-	N.save("N.txt", raw_ascii);
 	for (int i = 1; i < r; i++)
 	{
 		S(i-1, 0) = Q[i].x;
@@ -968,17 +950,10 @@ bool BsplineApp(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个数为r+1
 		<< Q[r].x << Q[r].y << Q[r].z << endr;
 	
 	mat Rb = S - NS*Qbe;
-	Rb.save("Rb.txt", raw_ascii);
-
 	mat NTRb = N.t()*Rb;
-	NTN.save("NTN.txt", raw_ascii);
-	NTRb.save("NTRb.txt", raw_ascii);
 	cout <<" det :" <<det(NTN) << endl;
 	//S.save("S.txt", raw_ascii);
 	mat PO = solve(NTN, NTRb);
-	PO.save("Po.txt", raw_ascii);
-	cout << "Control Point : " << endl;
-
 	ofstream fout;
 	fout.open("U.txt");
 	for (cerr = U.begin(); cerr != U.end(); cerr++){
@@ -990,81 +965,125 @@ bool BsplineApp(vector<point> Q, int r,     //Q[]存储拟合的数据点Q的个数为r+1
 	
 	fout.open("OUT.txt");
 	P.push_back(Q[0]);
-	cout << Qbe(0, 0) << " ";
-	cout << Qbe(0, 1) << " ";
-	cout << Qbe(0, 2) << " " << endl;
 	for (int i = 0; i < n-1 ; i++){
 		point out;
 		out.x = PO(i, 0);
-		cout << PO(i, 0) << " "; fout << PO(i, 0) << " ";
 		out.y = PO(i, 1);
-		cout << PO(i, 1) << " "; fout << PO(i, 1) << " ";
 		out.z = PO(i, 2);
-		cout << PO(i, 2) <<endl; fout << PO(i, 2) << "\n";;
 		P.push_back(out);
 	}
 	P.push_back(Q[r]);
-	cout << Qbe(1, 0) << " ";
-	cout << Qbe(1, 1) << " ";
-	cout << Qbe(1, 2) << " " << endl;
 	fout << flush;
 	fout.close();
 	return true;
 }
 
-void bspline::refineknotvectcurve(int n, int p){
-	/*节点细化，根据插入的x[]向量*/
-	int j;
-	int m = n + p + 1;
-	
-	int a = findspan(0, m_inumofknots, x[0]);
-	int b = findspan(0, m_inumofknots, x[xknots]);
-	b = b + 1;
-	for (j = 0; j < a - p; j++)
-	{
-		qw[j] = pw[j];
-	
-	}
-	for (j = b - 1; j <= n; j++)
-	{
-		qw[j + xknots + 1] = pw[j];
-		
-	} 
-	for (j = 0; j <= a; j++) ubar[j] = m_vfknotsvector[j];
-	for (j = b + p; j <= m; j++) ubar[j + xknots + 1] = m_vfknotsvector[j];
-	int i = b + p - 1;
-	int k = b + p + xknots;
-	for (j = xknots; j >= 0; j--)
-	{
-		while (x[j] <= m_vfknotsvector[i] && i>a)
-		{
-			qw[k - p - 1] = pw[i - p - 1];
-			ubar[k] = m_vfknotsvector[i];
-			k = k - 1;
-			i = i - 1;
-		}
-		qw[k - p - 1] = qw[k - p];
-		
-		for (j = xknots; j >= 0; j--)
-		{
-			int ind = k - p + 1;
-			float alfa = ubar[k + 1] - x[j];
-			if (abs(alfa) == 0)
-			{
-				qw[ind - 1] = qw[ind];
-			}
+//void refineknotvectcurve(int m_inumofknots, int p){
+//	/*节点细化，根据插入的x[]向量*/
+//	int j;
+//	int m = n + p + 1;
+//	
+//	int a = findspan(0, m_inumofknots, x[0]);
+//	int b = findspan(0, m_inumofknots, x[xknots]);
+//	b = b + 1;
+//	for (j = 0; j < a - p; j++)
+//	{
+//		qw[j] = pw[j];
+//	
+//	}
+//	for (j = b - 1; j <= n; j++)
+//	{
+//		qw[j + xknots + 1] = pw[j];
+//		
+//	} 
+//	for (j = 0; j <= a; j++) ubar[j] = m_vfknotsvector[j];
+//	for (j = b + p; j <= m; j++) ubar[j + xknots + 1] = m_vfknotsvector[j];
+//	int i = b + p - 1;
+//	int k = b + p + xknots;
+//	for (j = xknots; j >= 0; j--)
+//	{
+//		while (x[j] <= m_vfknotsvector[i] && i>a)
+//		{
+//			qw[k - p - 1] = pw[i - p - 1];
+//			ubar[k] = m_vfknotsvector[i];
+//			k = k - 1;
+//			i = i - 1;
+//		}
+//		qw[k - p - 1] = qw[k - p];
+//		
+//		for (j = xknots; j >= 0; j--)
+//		{
+//			int ind = k - p + 1;
+//			float alfa = ubar[k + 1] - x[j];
+//			if (abs(alfa) == 0)
+//			{
+//				qw[ind - 1] = qw[ind];
+//			}
+//
+//				
+//			else
+//			{
+//				alfa = alfa / (ubar[k + 1] - m_vfknotsvector[i - p + 1]);
+//				qw[ind - 1] = qw[ind - 1] * alfa + qw[ind] * (1.0 - alfa) ;
+//				
+//			}
+//		}
+//		ubar[k] = x[j];
+//		k = k + 1;
+//	}
+//	/*细化后节点矢量ubar和插入后控制点qw*/
+//    
+//}
 
-				
-			else
-			{
-				alfa = alfa / (ubar[k + 1] - m_vfknotsvector[i - p + 1]);
-				qw[ind - 1] = qw[ind - 1] * alfa + qw[ind] * (1.0 - alfa) ;
-				
-			}
+
+
+void 
+Gloal_Surf_Approx_Fixednm(
+	int result_x, int result_y, 
+	vector<vector<point> > data, 
+	int degree_p, int degree_q, 
+	int data_x, int data_y, 
+	vector<float>& knot_Vector_U, vector<float>& knot_Vector_V, 
+	vector<point>& result)
+{
+	vector<float> ub;
+	vector<float> vb;
+	Surf_Mesh_Params(result_x, result_y, data, ub, vb);
+	vector<float> U;
+	GetU(data_x, result_x, degree_p, ub, U);
+	vector<float> V;
+	GetU(data_y, result_y, degree_q, vb, V);
+
+	mat NU(data_x - 1, result_x - 1),         //N =[ NDip(uk)] 第i个基函数或它的一阶导数在uk处的值
+		MU(data_x + 1, result_x + 1),
+		SU(data_x - 1, 3),      //非约束数据项
+		TU(data_x + 1, 3),      //约束数据项目 
+		NSU(data_x - 1, 2);
+
+	for (int i = 1; i < data_x; i++)
+	{
+
+		//cout << span << endl;
+		for (int j = 1; j < result_x; j++)
+		{
+			//int span = FindSpan(U.size(), p, ub[i], U);
+			NU(i - 1, j - 1) = OneBasisFuns(degree_p, U.size() - 1, U, j - 1, ub[i]);
 		}
-		ubar[k] = x[j];
-		k = k + 1;
+
 	}
-	/*细化后节点矢量ubar和插入后控制点qw*/
-    
+
+
+
+	for (int i = 1, k = 0; i < data_x; i++, k++)
+	{
+		int span = FindSpan(U.size() - 1, degree_p, ub[i], U);
+		NSU(k, 0) = OneBasisFuns(p, U.size() - 1, U, 0, ub[i]);
+		NSU(k, 1) = OneBasisFuns(p, U.size() - 1, U, result_x, ub[i]);
+	}
+	for (int i = 1; i < r; i++)
+	{
+		S(i - 1, 0) = Q[i].x;
+		S(i - 1, 1) = Q[i].y;
+		S(i - 1, 2) = Q[i].z;
+	}
 }

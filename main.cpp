@@ -1,13 +1,14 @@
 #include <iostream>
 #include <armadillo>
 #include <vector>
-
+#include <math.h>
 
 #include "basis.h"
 #include "Nurbs-DS.h"
 using namespace arma;
 using namespace std;
 
+const float Pi = 3.14159265358979323846;
 
 float fordouble(float x)
 {
@@ -27,31 +28,27 @@ float fordouble(float x)
 
 int main(int argc, char *argv[])
 {
-	float num = 10.0;
-	int sub = 20;  //r = sub
-	float subA = num / sub;
+	//float num = 4.0;
+	float r = 1.0;
+	int sub = 360;  //r = sub
+	float subA = 2*Pi / sub;
 	vector<point> C;
-	float Wq[100];
 	vector<point> D;
-	int s = -1;
-	float Wd[1] = {1};
-	int I[1];
-	for (int i = 0; i < sub; i++)
+	cout << r*sin(0* subA) << " " << r*cos(0 * subA) << " " << 0 << endl;
+	for (int i = 0; i <sub/2; i++)
 	{
-		cout << i*subA << " " << fordouble(i*subA) << " "<< 0 << endl;
-		point out(i*subA, fordouble(i*subA), 0);
+		
+		point out(r*sin(i*subA), r*cos(i*subA), 0);
 		C.push_back(out);
-		Wq[i] = 1;
 	}
-	point out(num, fordouble(num), 0);
-	C.push_back(out);
-	Wq[sub - 1] = 1;
+	//cout << r*sin(360*subA)<< " " << r*cos(360*subA) << " "<< 0 << endl;
+
 	
-	int numofControlPoint = 10;
+	int numofControlPoint = 20;
 	int degree = 3;
 	vector<float> U;
 	vector<point> P;
-	BsplineApp(C, sub,     //Q[]存储拟合的数据点Q的个数为r+1
+	BsplineApp(C, sub/2,     //Q[]存储拟合的数据点Q的个数为r+1
 		numofControlPoint - 1,                //预备用n+1个控制点来拟合
 		degree,                //拟合曲线为p次
 		U, P   //输出的节点向量U和控制点p.
@@ -71,7 +68,28 @@ int main(int argc, char *argv[])
 	else{
 		std::cout << "bad" << endl;
 	}*/
-	
+	ofstream fout;
+	string filename = "fit100.nrb";
+	fout.open(filename);
+	fout << "degree " << degree << "\n";
+	fout << "control point " << numofControlPoint << "\n";
+	fout << "knots " << U.size() << "\n";
+
+	fout << "end_header\n";
+	fout << "\n";
+	for (int i = 0; i < P.size(); i++){
+		fout << P[i].x << " ";
+		fout << P[i].y << " ";
+		fout << P[i].z << "\n";;
+	}
+	fout << "\n";
+	fout << U[0] ;
+	for (int i = 1; i < U.size(); i++){
+		fout << " "<< U[i] ;
+	}
+	fout << "\n";
+	fout << flush;
+	fout.close();
 	cout << " success" << endl;
 	system("pause");
 	return 0;
